@@ -4,6 +4,7 @@ const DataCtrl = (function() {
     const classesBtn = document.getElementById("getClasses");
     const racesBtn = document.getElementById("getRaces");
     const monstersBtn = document.getElementById("getMonsters");
+    const searchInput = document.getElementById("search-input");
 
     async function getInfo(info) {
         const res = await fetch(`http://www.dnd5eapi.co${info}`);
@@ -18,7 +19,8 @@ const DataCtrl = (function() {
         classesBtn: classesBtn,
         racesBtn: racesBtn,
         monstersBtn: monstersBtn,
-        getInfo: getInfo
+        getInfo: getInfo,
+        searchInput: searchInput
     };
 })();
 
@@ -177,70 +179,30 @@ const UICtrl = (function() {
 // Main Controller
 const app = (function(data, ui) {
     let outputArr = [];
-    let category;
+    let currentCategory;
 
-    // fetch races list from api
-    async function getRaces() {
-        const racesData = await data.getInfo("/api/races");
-        const races = await JSON.parse(racesData).results;
-        console.log(races);
+    // fetch info from api
+    async function getInfo(category) {
+        currentCategory = category;
+        const info = await data.getInfo(`/api/${category}`);
+        const parsedData = await JSON.parse(info).results;
         outputArr = [];
-        races.forEach(race => outputArr.push(race));
+        parsedData.forEach(item => outputArr.push(item));
     }
 
-    // show races
-    async function showRaces() {
-        category = "races";
-        await getRaces();
+    // show fetched info
+    async function showInfo(e) {
+        await getInfo(e.target.value);
         ui.showData(outputArr);
     }
 
-    // fetch classes list from api
-    async function getClasses() {
-        const classesData = await data.getInfo("/api/classes");
-        const classes = await JSON.parse(classesData).results;
-        // console.log(classes);
-        outputArr = [];
-        classes.forEach(cls => outputArr.push(cls));
-    }
-
-    // show classes
-    async function showClasses() {
-        category = "classes";
-        await getClasses();
-        ui.showData(outputArr);
-    }
-
-    // fetch spells list from api
-    async function getSpells() {
-        const spellsData = await data.getInfo("/api/spells");
-        const spells = await JSON.parse(spellsData).results;
-        // console.log(spells);
-        outputArr = [];
-        spells.forEach(spell => outputArr.push(spell));
-    }
-
-    // show spells
-    async function showSpells() {
-        category = "spells";
-        await getSpells();
-        ui.showData(outputArr);
-    }
-
-    // fetch monsters list from api
-    async function getMonsters() {
-        const monstersData = await data.getInfo("/api/monsters");
-        const monsters = await JSON.parse(monstersData).results;
-        // console.log(monsters);
-        outputArr = [];
-        monsters.forEach(monster => outputArr.push(monster));
-    }
-
-    // show monsters
-    async function showMonsters() {
-        category = "monsters";
-        await getMonsters();
-        ui.showData(outputArr);
+    // filter the displayed list
+    function filterList(e) {
+        const searchVal = e.target.value.toLowerCase();
+        let filteredArr = outputArr.filter(listItem =>
+            listItem.name.toLowerCase().includes(searchVal)
+        );
+        ui.showData(filteredArr);
     }
 
     // get url and fetch data
@@ -259,21 +221,22 @@ const app = (function(data, ui) {
     // show more data
     async function showMoreData(e) {
         const info = await logData(e);
-        if (category === "races") {
+        if (currentCategory === "races") {
             ui.showRaceData(JSON.parse(info));
-        } else if (category === "classes") {
+        } else if (currentCategory === "classes") {
             ui.showClassData(JSON.parse(info));
-        } else if (category === "spells") {
+        } else if (currentCategory === "spells") {
             ui.showSpellData(JSON.parse(info));
-        } else if (category === "monsters") {
+        } else if (currentCategory === "monsters") {
             ui.showMonsterData(JSON.parse(info));
         }
     }
 
     // event listeners
-    data.racesBtn.addEventListener("click", showRaces);
-    data.classesBtn.addEventListener("click", showClasses);
-    data.spellsBtn.addEventListener("click", showSpells);
-    data.monstersBtn.addEventListener("click", showMonsters);
+    data.racesBtn.addEventListener("click", showInfo);
+    data.classesBtn.addEventListener("click", showInfo);
+    data.spellsBtn.addEventListener("click", showInfo);
+    data.monstersBtn.addEventListener("click", showInfo);
+    data.searchInput.addEventListener("input", filterList);
     ui.outputEl.addEventListener("click", showMoreData);
 })(DataCtrl, UICtrl);
