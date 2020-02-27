@@ -37,6 +37,7 @@
                             type="text"
                             class="form-control"
                             id="search-input"
+                            placeholder="Begin typing to search..."
                         />
                     </div>
                 </div>
@@ -44,8 +45,8 @@
 
             <div class="row mt-5">
                 <div class="col-4">
-                    <div id="output">
-                        <ul class="list-group" id="outputList"></ul>
+                    <div class="output" id="output">
+                        <ul class="outputList list-group" id="outputList"></ul>
                     </div>
                 </div>
                 <div class="col-8">
@@ -70,5 +71,10 @@
             integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
             crossorigin="anonymous"
         ></script>
+        <script>
+            $(function() {
+                $('[data-toggle="tooltip"]').tooltip();
+            });
+        </script>
     </body>
 </html>

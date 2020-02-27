@@ -6,11 +6,9 @@ const DataCtrl = (function() {
     const monstersBtn = document.getElementById("getMonsters");
     const searchInput = document.getElementById("search-input");
 
-    async function getInfo(info) {
+    async function fetchInfo(info) {
         const res = await fetch(`http://www.dnd5eapi.co${info}`);
         const data = await res.text();
-        // const dataJSON = await JSON.parse(data).results;
-        // return dataJSON;
         return data;
     }
 
@@ -19,7 +17,7 @@ const DataCtrl = (function() {
         classesBtn: classesBtn,
         racesBtn: racesBtn,
         monstersBtn: monstersBtn,
-        getInfo: getInfo,
+        fetchInfo: fetchInfo,
         searchInput: searchInput
     };
 })();
@@ -100,14 +98,21 @@ const UICtrl = (function() {
         showClassData: function(cls) {
             moreInfoEl.innerHTML = "";
             moreInfoEl.innerHTML = `
-                <div><strong>Class:</strong> ${cls.name}<div>
+                <div><strong data-toggle="tooltip" title="Tooltip Title" data-placement="top">Class:</strong> ${
+                    cls.name
+                }<div>
                 <div><strong>Hit Die:</strong> d${cls.hit_die}</div>
-                <div><strong>Proficiencies:</strong> Choose ${
+                <div><strong>Proficiencies:</strong> ${stringifyList(
+                    cls.proficiencies
+                )}</div>
+                <div><strong>Additional Proficiencies:</strong> Choose ${
                     cls.proficiency_choices[0].choose
-                }: ${stringifyList(cls.proficiencies)}</div>
+                } - ${stringifyList(cls.proficiency_choices[0].from)}</div>
                 <div><strong>Saving Throws:</strong> ${stringifyList(
                     cls.saving_throws
                 )}</div>
+                
+                
                 
             `;
         },
@@ -121,7 +126,8 @@ const UICtrl = (function() {
                     spell.classes
                 )}</div>
                 <div><strong>Range:</strong> ${spell.range}</div>
-                <div><strong>Casting Time:</strong ${spell.casting_time}</div>
+                <div><strong>Casting Time:</strong> ${spell.casting_time}</div>
+                <div><strong>Duration:</strong> ${spell.duration}</div>
                 <div><strong>Components:</strong> ${String(
                     spell.components
                 )}</div>
@@ -178,28 +184,22 @@ const UICtrl = (function() {
 
 // Main Controller
 const app = (function(data, ui) {
-    let outputArr = [];
     let currentCategory;
+    let parsedData;
 
-    // fetch info from api
-    async function getInfo(category) {
-        currentCategory = category;
-        const info = await data.getInfo(`/api/${category}`);
-        const parsedData = await JSON.parse(info).results;
-        outputArr = [];
-        parsedData.forEach(item => outputArr.push(item));
-    }
-
-    // show fetched info
-    async function showInfo(e) {
-        await getInfo(e.target.value);
-        ui.showData(outputArr);
+    // fetch info from api and display in list
+    async function getInfo(e) {
+        currentCategory = e.target.value;
+        const info = await data.fetchInfo(`/api/${currentCategory}`);
+        parsedData = await JSON.parse(info).results;
+        console.log(parsedData);
+        ui.showData(parsedData);
     }
 
     // filter the displayed list
     function filterList(e) {
         const searchVal = e.target.value.toLowerCase();
-        let filteredArr = outputArr.filter(listItem =>
+        let filteredArr = parsedData.filter(listItem =>
             listItem.name.toLowerCase().includes(searchVal)
         );
         ui.showData(filteredArr);
@@ -207,12 +207,12 @@ const app = (function(data, ui) {
 
     // get url and fetch data
     async function logData(e) {
-        const clickedItem = outputArr.filter(
+        const clickedItem = parsedData.filter(
             item => item.name === e.target.innerText
         )[0];
 
         const url = clickedItem.url;
-        const clickedInfo = await data.getInfo(url);
+        const clickedInfo = await data.fetchInfo(url);
 
         console.log(JSON.parse(clickedInfo));
         return clickedInfo;
@@ -233,10 +233,10 @@ const app = (function(data, ui) {
     }
 
     // event listeners
-    data.racesBtn.addEventListener("click", showInfo);
-    data.classesBtn.addEventListener("click", showInfo);
-    data.spellsBtn.addEventListener("click", showInfo);
-    data.monstersBtn.addEventListener("click", showInfo);
+    data.racesBtn.addEventListener("click", getInfo);
+    data.classesBtn.addEventListener("click", getInfo);
+    data.spellsBtn.addEventListener("click", getInfo);
+    data.monstersBtn.addEventListener("click", getInfo);
     data.searchInput.addEventListener("input", filterList);
     ui.outputEl.addEventListener("click", showMoreData);
 })(DataCtrl, UICtrl);

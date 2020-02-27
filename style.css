@@ -1,7 +1,9 @@
 li:hover {
     background-color: cadetblue;
+    cursor: pointer;
 }
 
-.container {
-    max-height: 100vh;
+.outputList {
+    overflow: scroll;
+    max-height: 80vh;
 }
