@@ -27,27 +27,13 @@ const UICtrl = (function() {
     const outputEl = document.getElementById("outputList");
     const moreInfoEl = document.getElementById("moreInfo");
 
-    function stringifyList(list) {
-        let output = "";
-        list.forEach(item => {
-            if (list.length === 1) {
-                output += item.name;
-            } else if (list.indexOf(item) !== list.length - 1) {
-                output += item.name + ", ";
-            } else {
-                output += item.name;
-            }
-        });
-        return output;
-    }
-
     return {
         showData: function(data) {
             outputEl.innerHTML = "";
             moreInfoEl.innerHTML = "";
             data.forEach(item => {
                 outputEl.innerHTML += `
-                    <li class="list-group-item shadow-sm">${item.name}</li>
+                    <li class="list-group-item list-group-item-action shadow-sm">${item.name}</li>
                 `;
             });
         },
@@ -58,7 +44,11 @@ const UICtrl = (function() {
                 <div><strong>Race:</strong> ${race.name}</div>
                 <div><strong>Ability Bonus:</strong> ${
                     race.ability_bonuses.length > 0
-                        ? stringifyBonuses(race.ability_bonuses)
+                        ? race.ability_bonuses.map(
+                              bonus => `
+                            <span>+${bonus.bonus} to <a href="#" class="tip" url="${bonus.url}" onmouseover="app.getToolTips(this, '${bonus.url}')">${bonus.name}</a></span>
+                        `
+                          )
                         : "none"
                 }
                 <div><strong>Speed:</strong> ${race.speed}</div>
@@ -66,50 +56,56 @@ const UICtrl = (function() {
                 <div><strong>Size:</strong> ${race.size_description}</div>
                 <div><strong>Starting Proficiencies:</strong> ${
                     race.starting_proficiencies.length > 0
-                        ? stringifyList(race.starting_proficiencies)
+                        ? race.starting_proficiencies.map(
+                              prof => `
+                                <span>${prof.name}</span>
+                        `
+                          )
                         : "none"
                 }</div>
                 <div><strong>Languages:</strong> ${race.language_desc}</div>
                 <div><strong>Traits:</strong> ${
-                    race.traits.length > 0 ? stringifyList(race.traits) : "none"
+                    race.traits.length > 0
+                        ? race.traits.map(
+                              trait => `
+                        <span><a href="" class="tip" url="${trait.url}" onmouseover="app.getToolTips(this, '${trait.url}')">${trait.name}</a></span>
+                    `
+                          )
+                        : "none"
                 }</div>
                 <div><strong>Subraces:</strong> ${
                     race.subraces.length > 0
-                        ? stringifyList(race.subraces)
+                        ? race.subraces.map(
+                              subrace => `
+                            <span>${subrace.name}</span>
+                        `
+                          )
                         : "none"
                 }</div>
             `;
-
-            function stringifyBonuses(list) {
-                let output = "";
-                list.forEach(bonus => {
-                    if (list.length === 1) {
-                        output += `+${bonus.bonus} to ${bonus.name}`;
-                    } else if (list.indexOf(bonus) !== list.length - 1) {
-                        output += `+${bonus.bonus} to ${bonus.name}, `;
-                    } else {
-                        output += `+${bonus.bonus} to ${bonus.name}`;
-                    }
-                });
-                return output;
-            }
         },
 
         showClassData: function(cls) {
             moreInfoEl.innerHTML = "";
             moreInfoEl.innerHTML = `
-                <div><strong data-toggle="tooltip" title="Tooltip Title" data-placement="top">Class:</strong> ${
-                    cls.name
-                }<div>
+                <div><strong>Class:</strong> ${cls.name}<div>
                 <div><strong>Hit Die:</strong> d${cls.hit_die}</div>
-                <div><strong>Proficiencies:</strong> ${stringifyList(
-                    cls.proficiencies
+                <div><strong>Proficiencies:</strong> ${cls.proficiencies.map(
+                    prof => `
+                    <span>${prof.name}</span>
+                `
                 )}</div>
                 <div><strong>Additional Proficiencies:</strong> Choose ${
                     cls.proficiency_choices[0].choose
-                } - ${stringifyList(cls.proficiency_choices[0].from)}</div>
-                <div><strong>Saving Throws:</strong> ${stringifyList(
-                    cls.saving_throws
+                } - ${cls.proficiency_choices[0].from.map(
+                prof => `
+                    <span>${prof.name}</span>
+                `
+            )}</div>
+                <div><strong>Saving Throws:</strong> ${cls.saving_throws.map(
+                    save => `
+                    <a href="" onmouseover="app.getToolTips(this, '${save.url}')">${save.name}</a>
+                `
                 )}</div>
                 
                 
@@ -122,8 +118,10 @@ const UICtrl = (function() {
             moreInfoEl.innerHTML = `
                 <div><strong>Name:</strong> ${spell.name}</div>
                 <div><strong>Level:</strong> ${spell.level}</div>
-                <div><strong>Classes:</strong> ${stringifyList(
-                    spell.classes
+                <div><strong>Classes:</strong> ${spell.classes.map(
+                    cla => `
+                    <span>${cla.name}</span>
+                `
                 )}</div>
                 <div><strong>Range:</strong> ${spell.range}</div>
                 <div><strong>Casting Time:</strong> ${spell.casting_time}</div>
@@ -183,14 +181,14 @@ const UICtrl = (function() {
 })();
 
 // Main Controller
-const app = (function(data, ui) {
+const app = (function(dataCtrl, ui) {
     let currentCategory;
     let parsedData;
 
     // fetch info from api and display in list
     async function getInfo(e) {
         currentCategory = e.target.value;
-        const info = await data.fetchInfo(`/api/${currentCategory}`);
+        const info = await dataCtrl.fetchInfo(`/api/${currentCategory}`);
         parsedData = await JSON.parse(info).results;
         console.log(parsedData);
         ui.showData(parsedData);
@@ -212,9 +210,8 @@ const app = (function(data, ui) {
         )[0];
 
         const url = clickedItem.url;
-        const clickedInfo = await data.fetchInfo(url);
+        const clickedInfo = await dataCtrl.fetchInfo(url);
 
-        console.log(JSON.parse(clickedInfo));
         return clickedInfo;
     }
 
@@ -233,10 +230,28 @@ const app = (function(data, ui) {
     }
 
     // event listeners
-    data.racesBtn.addEventListener("click", getInfo);
-    data.classesBtn.addEventListener("click", getInfo);
-    data.spellsBtn.addEventListener("click", getInfo);
-    data.monstersBtn.addEventListener("click", getInfo);
-    data.searchInput.addEventListener("input", filterList);
+    dataCtrl.racesBtn.addEventListener("click", getInfo);
+    dataCtrl.classesBtn.addEventListener("click", getInfo);
+    dataCtrl.spellsBtn.addEventListener("click", getInfo);
+    dataCtrl.monstersBtn.addEventListener("click", getInfo);
+    dataCtrl.searchInput.addEventListener("input", filterList);
     ui.outputEl.addEventListener("click", showMoreData);
+
+    async function getToolTips(el, url) {
+        const tip = await dataCtrl.fetchInfo(url);
+        const tipJSON = JSON.parse(tip);
+        let tipDesc = "";
+        await tipJSON.desc.forEach(desc => (tipDesc += desc));
+        console.log(tipDesc);
+        el.setAttribute("data-toggle", "tooltip");
+        el.setAttribute("data-placement", "top");
+        el.setAttribute("data-original-title", tipDesc);
+        $(function() {
+            $(el).tooltip("show");
+        });
+    }
+
+    return {
+        getToolTips: getToolTips
+    };
 })(DataCtrl, UICtrl);
