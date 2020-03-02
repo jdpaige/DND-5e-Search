@@ -10,20 +10,39 @@
             integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
             crossorigin="anonymous"
         />
-        <title>Document</title>
+        <title>D&D 5e Search</title>
     </head>
     <body>
         <div class="container mt-3">
-            <button class="btn btn-secondary" id="getRaces" value="races">
+            <div class="header" id="header">
+                <p class="header text-light text-center h1">D&D 5e Search</p>
+            </div>
+            <button
+                class="btn btn-secondary btn-main"
+                id="getRaces"
+                value="races"
+            >
                 Get Races
             </button>
-            <button class="btn btn-primary" id="getClasses" value="classes">
+            <button
+                class="btn btn-secondary btn-main"
+                id="getClasses"
+                value="classes"
+            >
                 Get Classes
             </button>
-            <button class="btn btn-success" id="getSpells" value="spells">
+            <button
+                class="btn btn-secondary btn-main"
+                id="getSpells"
+                value="spells"
+            >
                 Get Spells
             </button>
-            <button class="btn btn-danger" id="getMonsters" value="monsters">
+            <button
+                class="btn btn-secondary btn-main"
+                id="getMonsters"
+                value="monsters"
+            >
                 Get Monsters
             </button>
 
@@ -37,7 +56,7 @@
                             type="text"
                             class="form-control"
                             id="search-input"
-                            placeholder="Begin typing to search..."
+                            placeholder="Begin typing to filter..."
                         />
                     </div>
                 </div>
@@ -50,7 +69,11 @@
                     </div>
                 </div>
                 <div class="col-8">
-                    <div id="moreInfo"></div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="moreInfo"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
