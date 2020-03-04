@@ -26,8 +26,11 @@ const DataCtrl = (function() {
 
 // UI Controller
 const UICtrl = (function() {
+    const searchGroup = document.getElementById("searchGroup");
     const outputEl = document.getElementById("outputList");
+    const outputElGroup = document.getElementById("outputListGroup");
     const moreInfoEl = document.getElementById("moreInfo");
+    const moreInfoGroup = document.getElementById("moreInfoGroup");
 
     return {
         showData: function(data) {
@@ -107,7 +110,11 @@ const UICtrl = (function() {
                         cls.proficiency_choices[0].choose
                     } - ${cls.proficiency_choices[0].from.map(
                 prof => `
-                        <span>${prof.name.split(":")[1].trim()}</span>
+                        <span>${
+                            prof.name.includes(":")
+                                ? prof.name.split(":")[1].trim()
+                                : prof.name
+                        }</span>
                     `
             )}</div>
                     <div><strong>Saving Throws:</strong> ${cls.saving_throws.map(
@@ -192,8 +199,11 @@ const UICtrl = (function() {
             `;
         },
 
+        searchGroup: searchGroup,
         outputEl: outputEl,
-        moreInfoEl: moreInfoEl
+        outputElGroup: outputElGroup,
+        moreInfoEl: moreInfoEl,
+        moreInfoGroup: moreInfoGroup
     };
 })();
 
@@ -205,6 +215,12 @@ const app = (function(dataCtrl, ui) {
     // fetch info from api and display in list
     async function getInfo(e) {
         currentCategory = e.target.value;
+
+        if (!ui.moreInfoGroup.classList.value.includes("hide")) {
+            ui.moreInfoGroup.classList.add("hide");
+        }
+        ui.outputElGroup.classList.remove("hide");
+        ui.searchGroup.classList.remove("hide");
 
         const info = await dataCtrl.fetchInfo(`/api/${currentCategory}`);
         parsedData = await JSON.parse(info).results;
@@ -249,12 +265,14 @@ const app = (function(dataCtrl, ui) {
 
     // show more data
     async function showMoreData(e) {
+        ui.moreInfoGroup.classList.remove("hide");
         const info = await logData(e);
         if (currentCategory === "races") {
             const raceData = JSON.parse(info);
             ui.showRaceData(raceData);
         } else if (currentCategory === "classes") {
             const classData = JSON.parse(info);
+
             ui.showClassData(JSON.parse(info));
             console.log(classData);
             const equipment = await dataCtrl.fetchInfo(

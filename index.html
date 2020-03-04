@@ -17,41 +17,40 @@
             <div class="header" id="header">
                 <p class="header text-light text-center h1">D&D 5e Search</p>
             </div>
-            <button
-                class="btn btn-secondary btn-main"
-                id="getRaces"
-                value="races"
-            >
-                Get Races
-            </button>
-            <button
-                class="btn btn-secondary btn-main"
-                id="getClasses"
-                value="classes"
-            >
-                Get Classes
-            </button>
-            <button
-                class="btn btn-secondary btn-main"
-                id="getSpells"
-                value="spells"
-            >
-                Get Spells
-            </button>
-            <button
-                class="btn btn-secondary btn-main"
-                id="getMonsters"
-                value="monsters"
-            >
-                Get Monsters
-            </button>
+            <div class="buttonGroup">
+                <button
+                    class="btn btn-secondary btn-main"
+                    id="getRaces"
+                    value="races"
+                >
+                    Search Races
+                </button>
+                <button
+                    class="btn btn-secondary btn-main"
+                    id="getClasses"
+                    value="classes"
+                >
+                    Search Classes
+                </button>
+                <button
+                    class="btn btn-secondary btn-main"
+                    id="getSpells"
+                    value="spells"
+                >
+                    Search Spells
+                </button>
+                <button
+                    class="btn btn-secondary btn-main"
+                    id="getMonsters"
+                    value="monsters"
+                >
+                    Search Monsters
+                </button>
+            </div>
 
             <div class="row">
-                <div class="col-6">
-                    <div class="input-group mt-4">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">Search</span>
-                        </div>
+                <div class="col-3">
+                    <div class="input-group mt-4 hide" id="searchGroup">
                         <input
                             type="text"
                             class="form-control"
@@ -63,15 +62,15 @@
             </div>
 
             <div class="row mt-5">
-                <div class="col-4">
+                <div class="col-3 hide" id="outputListGroup">
                     <div class="output" id="output">
-                        <ul class="outputList list-group" id="outputList"></ul>
+                        <ul class="list-group outputList" id="outputList"></ul>
                     </div>
                 </div>
-                <div class="col-8">
+                <div class="col-9 hide" id="moreInfoGroup">
                     <div class="card">
                         <div class="card-body">
-                            <div id="moreInfo"></div>
+                            <div class="moreInfo" id="moreInfo"></div>
                         </div>
                     </div>
                 </div>

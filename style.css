@@ -10,7 +10,12 @@ body {
     line-height: 1.7rem !important;
 }
 
+.buttonGroup {
+    text-align: center;
+}
+
 .container {
+    width: 600px;
     font-size: 18px;
 }
 
@@ -22,7 +27,8 @@ li:hover {
     cursor: pointer;
 }
 
-.outputList {
+.outputList,
+.moreInfo {
     overflow: scroll;
     max-height: 70vh;
 }
@@ -31,8 +37,8 @@ li:hover {
     padding: 10px;
 }
 
-#moreInfo {
-    color: #fff;
+.hide {
+    visibility: hidden;
 }
 
 .large.tooltip-inner {
